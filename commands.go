@@ -15,6 +15,7 @@ func NewState() *State {
 	c, err := config.Read()
 	if err != nil {
 		fmt.Println(err)
+		return nil
 	}
 	return &State{
 		cfg: &c,
@@ -47,7 +48,7 @@ func handlerLogin(s *State, cmd Command) error {
 	if len(cmd.args) == 0 {
 		return errors.New("missing args")
 	}
-	err := s.cfg.SetUser(cmd.args[1])
+	err := s.cfg.SetUser(cmd.args[0])
 	if err != nil {
 		return err
 	}
