@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
+
+	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -24,10 +26,8 @@ func main() {
 		fmt.Printf("%s\n", e)
 		os.Exit(1)
 	} else if len(stuff) == 3 {
-		fmt.Println(stuff)
 		var args_temp []string = make([]string, 1)
 		args_temp[0] = stuff[2]
-		fmt.Println(args_temp)
 		issue := Command{
 			name: stuff[1],
 			args: args_temp,
