@@ -1,13 +1,18 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/janiv/gator/internal/config"
+	"github.com/janiv/gator/internal/database"
 )
 
 type State struct {
+	db  *database.Queries
 	cfg *config.Config
 }
 
@@ -36,8 +41,7 @@ func (c *Commands) run(s *State, cmd Command) error {
 	if !exists {
 		return errors.New("yo you missing a command")
 	}
-	val(s, cmd)
-	return nil
+	return val(s, cmd)
 }
 
 func (c *Commands) register(name string, f func(*State, Command) error) {
@@ -48,10 +52,46 @@ func handlerLogin(s *State, cmd Command) error {
 	if len(cmd.args) == 0 {
 		return errors.New("missing args")
 	}
-	err := s.cfg.SetUser(cmd.args[0])
+	name := cmd.args[0]
+	usr_check, err := s.db.GetUser(context.Background(), name)
+	if err != nil {
+		fmt.Printf("%s is not in database\n", name)
+		return err
+	}
+	set_err := s.cfg.SetUser(usr_check.Name)
+	if set_err != nil {
+		return set_err
+	}
+	fmt.Println("user set")
+	return nil
+}
+
+func handlerRegister(s *State, cmd Command) error {
+	if len(cmd.args) == 0 {
+		return errors.New("missing args")
+	}
+	fmt.Printf("args= %s\n", cmd.args[0])
+	name := cmd.args[0]
+	usr_check, err := s.db.GetUser(context.Background(), name)
+	if err != nil {
+		fmt.Printf("%s not in database, attempting to create\n", name)
+	} else {
+		fmt.Printf("%s already exists\n", usr_check.Name)
+		return errors.New("user already exists")
+	}
+	curr_time := time.Now()
+	db_params := database.CreateUserParams{
+		ID:        uuid.New(),
+		CreatedAt: curr_time,
+		UpdatedAt: curr_time,
+		Name:      name,
+	}
+	fmt.Println(db_params)
+	usr, err := s.db.CreateUser(context.Background(), db_params)
 	if err != nil {
 		return err
 	}
-	fmt.Println("user set")
+	handlerLogin(s, cmd)
+	fmt.Printf("User %s was created\n", usr.Name)
 	return nil
 }

@@ -26,13 +26,12 @@ func Read() (Config, error) {
 		return cfg, err
 	}
 	defer file.Close()
-	data := make([]byte, 100)
+	data := make([]byte, 500)
 	count, bytes_err := file.Read(data)
 	if bytes_err != nil {
 		fmt.Println("bytes error")
 		return cfg, bytes_err
 	}
-
 	// We need to resize data[] to exact size to prevent invalid character '\x00' error
 	json_err := json.Unmarshal(data[:count], &cfg)
 	if json_err != nil {
