@@ -24,6 +24,8 @@ func main() {
 	}
 	coms.register("login", handlerLogin)
 	coms.register("register", handlerRegister)
+	coms.register("reset", handlerReset)
+	coms.register("users", handlerUsers)
 	stuff := os.Args
 	stuff_len := len(stuff)
 	switch stuff_len {
@@ -34,6 +36,18 @@ func main() {
 		}
 	case 2:
 		{
+			if stuff[1] == "reset" || stuff[1] == "users" {
+				issue := Command{
+					name: stuff[1],
+					args: nil,
+				}
+				e := coms.run(s, issue)
+				if e != nil {
+					fmt.Printf("%s\n", e)
+					os.Exit(1)
+				}
+				os.Exit(0)
+			}
 			fmt.Println("missing username for login/register")
 			os.Exit(1)
 		}

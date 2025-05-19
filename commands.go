@@ -95,3 +95,35 @@ func handlerRegister(s *State, cmd Command) error {
 	fmt.Printf("User %s was created\n", usr.Name)
 	return nil
 }
+
+func handlerReset(s *State, cmd Command) error {
+	err := s.db.Reset(context.Background())
+	if err != nil {
+		return err
+	}
+	fmt.Println("database reset")
+	return nil
+}
+
+func handlerUsers(s *State, cmd Command) error {
+	users, err := s.db.GetUsers(context.Background())
+	if err != nil {
+		return err
+	}
+	// ok this is a bit stupid but we doing it anyway
+	curr := users[0]
+
+	for _, usr := range users {
+		if usr.UpdatedAt.After(curr.UpdatedAt) {
+			curr = usr
+		}
+	}
+	for _, usr := range users {
+		fmt.Printf("* %s ", usr.Name)
+		if usr == curr {
+			fmt.Print("(current)")
+		}
+		fmt.Print("\n")
+	}
+	return nil
+}
