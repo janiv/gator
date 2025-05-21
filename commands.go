@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"html"
 	"time"
 
 	"github.com/google/uuid"
@@ -124,6 +125,31 @@ func handlerUsers(s *State, cmd Command) error {
 			fmt.Print("(current)")
 		}
 		fmt.Print("\n")
+	}
+	return nil
+}
+
+func handlerAgg(s *State, cmd Command) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	rss, err := FetchFeed(ctx, "https://www.wagslane.dev/index.xml")
+	if err != nil {
+		return err
+	}
+	ch := &rss.Channel
+	items := ch.Item
+	pretty_tit := html.UnescapeString(ch.Title)
+	pretty_desc := html.UnescapeString(ch.Description)
+	fmt.Printf("%s\n", pretty_tit)
+	fmt.Printf("%s\n", ch.Link)
+	fmt.Printf("%s\n", pretty_desc)
+	for _, i := range items {
+		p_t := html.UnescapeString(i.Title)
+		p_d := html.UnescapeString(i.Description)
+		fmt.Printf("%s\n", p_t)
+		fmt.Printf("%s\n", i.Link)
+		fmt.Printf("%s\n", p_d)
+		fmt.Printf("%s\n", i.PubDate)
 	}
 	return nil
 }

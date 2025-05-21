@@ -26,6 +26,7 @@ func main() {
 	coms.register("register", handlerRegister)
 	coms.register("reset", handlerReset)
 	coms.register("users", handlerUsers)
+	coms.register("agg", handlerAgg)
 	stuff := os.Args
 	stuff_len := len(stuff)
 	switch stuff_len {
@@ -36,7 +37,7 @@ func main() {
 		}
 	case 2:
 		{
-			if stuff[1] == "reset" || stuff[1] == "users" {
+			if stuff[1] == "reset" || stuff[1] == "users" || stuff[1] == "agg" {
 				issue := Command{
 					name: stuff[1],
 					args: nil,
