@@ -12,7 +12,7 @@ RETURNING *;
 SELECT * FROM users WHERE name = $1 LIMIT 1;
 
 -- name: Reset :exec
-TRUNCATE users;
+DELETE FROM users;
 
 -- name: GetUsers :many
 SELECT * FROM users;

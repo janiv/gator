@@ -27,6 +27,7 @@ func main() {
 	coms.register("reset", handlerReset)
 	coms.register("users", handlerUsers)
 	coms.register("agg", handlerAgg)
+	coms.register("addfeed", handlerAddFeed)
 	stuff := os.Args
 	stuff_len := len(stuff)
 	switch stuff_len {
@@ -56,6 +57,24 @@ func main() {
 		{
 			var args_temp []string = make([]string, 1)
 			args_temp[0] = stuff[2]
+			issue := Command{
+				name: stuff[1],
+				args: args_temp,
+			}
+			e := coms.run(s, issue)
+			if e != nil {
+				fmt.Printf("%s\n", e)
+				os.Exit(1)
+			} else {
+				fmt.Println("Hey it worked")
+				os.Exit(0)
+			}
+		}
+	case 4:
+		{
+			var args_temp []string = make([]string, 2)
+			args_temp[0] = stuff[2]
+			args_temp[1] = stuff[3]
 			issue := Command{
 				name: stuff[1],
 				args: args_temp,

@@ -153,3 +153,35 @@ func handlerAgg(s *State, cmd Command) error {
 	}
 	return nil
 }
+
+func handlerAddFeed(s *State, cmd Command) error {
+	if len(cmd.args) < 2 {
+		return errors.New("missing args")
+	}
+	name := cmd.args[0]
+	url := cmd.args[1]
+	users, err := s.db.GetUsers(context.Background())
+	if err != nil {
+		return err
+	}
+	curr := users[0]
+	for _, usr := range users {
+		if usr.UpdatedAt.After(curr.UpdatedAt) {
+			curr = usr
+		}
+	}
+	curr_time := time.Now()
+	db_params := database.CreateFeedParams{
+		CreatedAt: curr_time,
+		UpdatedAt: curr_time,
+		Name:      name,
+		Url:       url,
+		UserID:    curr.ID,
+	}
+	feed, err := s.db.CreateFeed(context.Background(), db_params)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Feed %s was created\n", feed.Name)
+	return nil
+}
