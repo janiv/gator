@@ -28,6 +28,7 @@ func main() {
 	coms.register("users", handlerUsers)
 	coms.register("agg", handlerAgg)
 	coms.register("addfeed", handlerAddFeed)
+	coms.register("feeds", handlerFeeds)
 	stuff := os.Args
 	stuff_len := len(stuff)
 	switch stuff_len {
@@ -38,7 +39,7 @@ func main() {
 		}
 	case 2:
 		{
-			if stuff[1] == "reset" || stuff[1] == "users" || stuff[1] == "agg" {
+			if stuff[1] == "reset" || stuff[1] == "users" || stuff[1] == "agg" || stuff[1] == "feeds" {
 				issue := Command{
 					name: stuff[1],
 					args: nil,
