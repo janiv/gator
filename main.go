@@ -27,10 +27,11 @@ func main() {
 	coms.register("reset", handlerReset)
 	coms.register("users", handlerUsers)
 	coms.register("agg", handlerAgg)
-	coms.register("addfeed", handlerAddFeed)
+	coms.register("addfeed", middlewareLoggedIn(handlerAddFeed))
 	coms.register("feeds", handlerFeeds)
-	coms.register("follow", handlerFollow)
-	coms.register("following", handlerFollowing)
+	coms.register("follow", middlewareLoggedIn(handlerFollow))
+	coms.register("following", middlewareLoggedIn(handlerFollowing))
+	coms.register("unfollow", middlewareLoggedIn(handlerUnfollow))
 	stuff := os.Args
 	stuff_len := len(stuff)
 	switch stuff_len {
