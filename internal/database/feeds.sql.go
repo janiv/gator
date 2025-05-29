@@ -109,21 +109,18 @@ func (q *Queries) GetFeeds(ctx context.Context) ([]Feed, error) {
 }
 
 const getNextFeedToFetch = `-- name: GetNextFeedToFetch :one
-SELECT id, created_at, updated_at, last_fetched, name, url, user_id FROM feeds ORDER BY last_fetched NULLS FIRST LIMIT 1
+SELECT id, url FROM feeds ORDER BY last_fetched NULLS FIRST LIMIT 1
 `
 
-func (q *Queries) GetNextFeedToFetch(ctx context.Context) (Feed, error) {
+type GetNextFeedToFetchRow struct {
+	ID  int32
+	Url string
+}
+
+func (q *Queries) GetNextFeedToFetch(ctx context.Context) (GetNextFeedToFetchRow, error) {
 	row := q.db.QueryRowContext(ctx, getNextFeedToFetch)
-	var i Feed
-	err := row.Scan(
-		&i.ID,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.LastFetched,
-		&i.Name,
-		&i.Url,
-		&i.UserID,
-	)
+	var i GetNextFeedToFetchRow
+	err := row.Scan(&i.ID, &i.Url)
 	return i, err
 }
 

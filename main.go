@@ -26,7 +26,6 @@ func main() {
 	coms.register("register", handlerRegister)
 	coms.register("reset", handlerReset)
 	coms.register("users", handlerUsers)
-	coms.register("agg", handlerAgg)
 	coms.register("addfeed", middlewareLoggedIn(handlerAddFeed))
 	coms.register("feeds", handlerFeeds)
 	coms.register("follow", middlewareLoggedIn(handlerFollow))
@@ -37,7 +36,8 @@ func main() {
 	switch stuff_len {
 	case 1:
 		{
-			fmt.Println("missing arguments")
+			handlerAgg("15s")
+			fmt.Println("running agg")
 			os.Exit(1)
 		}
 	case 2:

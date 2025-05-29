@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"html"
+	"os"
 	"time"
 
 	"github.com/google/uuid"
@@ -129,28 +131,57 @@ func handlerUsers(s *State, cmd Command) error {
 	return nil
 }
 
-func handlerAgg(s *State, cmd Command) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	rss, err := FetchFeed(ctx, "https://www.wagslane.dev/index.xml")
+func handlerAgg(time_between_reqs string) error {
+	timeBetweenRequests, time_err := time.ParseDuration(time_between_reqs)
+	if time_err != nil {
+		return time_err
+	}
+	ticker := time.NewTicker(timeBetweenRequests)
+	for ; ; <-ticker.C {
+		fmt.Println("Making a request!")
+		scrapeFeeds()
+		fmt.Println("WAITING TO MAKE NEXT REQUEST")
+	}
+}
+
+func scrapeFeeds() error {
+	s := NewState()
+	db, err := sql.Open("postgres", s.cfg.DbURL)
+	if err != nil {
+		fmt.Printf("%s\n", err)
+		os.Exit(1)
+	}
+	dbQueries := database.New(db)
+	s.db = dbQueries
+	next_feed, err := s.db.GetNextFeedToFetch(context.Background())
 	if err != nil {
 		return err
 	}
-	ch := &rss.Channel
-	items := ch.Item
-	pretty_tit := html.UnescapeString(ch.Title)
-	pretty_desc := html.UnescapeString(ch.Description)
-	fmt.Printf("%s\n", pretty_tit)
-	fmt.Printf("%s\n", ch.Link)
-	fmt.Printf("%s\n", pretty_desc)
-	for _, i := range items {
-		p_t := html.UnescapeString(i.Title)
-		p_d := html.UnescapeString(i.Description)
-		fmt.Printf("%s\n", p_t)
-		fmt.Printf("%s\n", i.Link)
-		fmt.Printf("%s\n", p_d)
-		fmt.Printf("%s\n", i.PubDate)
+	curr_time := time.Now()
+	db_params := database.MarkFeedFetchedParams{
+		LastFetched: sql.NullTime{
+			Time:  curr_time,
+			Valid: true,
+		},
+		ID: next_feed.ID,
 	}
+	mar_err := s.db.MarkFeedFetched(context.Background(), db_params)
+	if mar_err != nil {
+		return mar_err
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	feed, err := FetchFeed(ctx, next_feed.Url)
+	if err != nil {
+		return err
+	}
+	ch := &feed.Channel
+	items := ch.Item
+	for _, i := range items {
+		pretty_title := html.UnescapeString(i.Title)
+		fmt.Printf("%s\n", pretty_title)
+	}
+
 	return nil
 }
 
