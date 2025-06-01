@@ -31,6 +31,7 @@ func main() {
 	coms.register("follow", middlewareLoggedIn(handlerFollow))
 	coms.register("following", middlewareLoggedIn(handlerFollowing))
 	coms.register("unfollow", middlewareLoggedIn(handlerUnfollow))
+	coms.register("browse", middlewareLoggedIn(handlerBrowse))
 	stuff := os.Args
 	stuff_len := len(stuff)
 	switch stuff_len {
@@ -42,7 +43,7 @@ func main() {
 		}
 	case 2:
 		{
-			if stuff[1] == "reset" || stuff[1] == "users" || stuff[1] == "agg" || stuff[1] == "feeds" || stuff[1] == "following" {
+			if stuff[1] == "reset" || stuff[1] == "users" || stuff[1] == "agg" || stuff[1] == "feeds" || stuff[1] == "following" || stuff[1] == "browse" {
 				issue := Command{
 					name: stuff[1],
 					args: nil,

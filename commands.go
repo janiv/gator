@@ -7,9 +7,11 @@ import (
 	"fmt"
 	"html"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/itlightning/dateparse"
 	"github.com/janiv/gator/internal/config"
 	"github.com/janiv/gator/internal/database"
 )
@@ -177,9 +179,38 @@ func scrapeFeeds() error {
 	}
 	ch := &feed.Channel
 	items := ch.Item
+	post_time := time.Now()
 	for _, i := range items {
 		pretty_title := html.UnescapeString(i.Title)
-		fmt.Printf("%s\n", pretty_title)
+		desc := html.UnescapeString(i.Description)
+		pub_date := i.PubDate
+		pub_date_parsed, err := dateparse.ParseLocal(pub_date)
+		if err != nil {
+			return err
+		}
+		db_params_posts := database.CreatePostParams{
+			CreatedAt: post_time,
+			UpdatedAt: post_time,
+			Title: sql.NullString{
+				String: pretty_title,
+				Valid:  true,
+			},
+			PostUrl: i.Link,
+			PostDescription: sql.NullString{
+				String: desc,
+				Valid:  true,
+			},
+			PublishedAt: sql.NullTime{
+				Time:  pub_date_parsed,
+				Valid: true,
+			},
+			FeedID: next_feed.ID,
+		}
+		post, err := s.db.CreatePost(context.Background(), db_params_posts)
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Printf("Post: %s was created\n", post.PostUrl)
 	}
 
 	return nil
@@ -282,6 +313,39 @@ func handlerUnfollow(s *State, cmd Command, user database.User) error {
 	delete_err := s.db.DeleteByIDs(context.Background(), db_params)
 	if delete_err != nil {
 		return delete_err
+	}
+	return nil
+}
+
+func handlerBrowse(s *State, cmd Command, user database.User) error {
+	var limit int32 = 2
+	if len(cmd.args) != 0 {
+		temp_limit, err := strconv.Atoi(cmd.args[0])
+		if err != nil {
+			return err
+		}
+		limit = int32(temp_limit)
+	}
+
+	db_params := database.GetPostsForUserParams{
+		UserID: user.ID,
+		Limit:  limit,
+	}
+	posts, err := s.db.GetPostsForUser(context.Background(), db_params)
+	if err != nil {
+		return err
+	}
+	for _, p := range posts {
+		var title string
+		var desc string
+		if p.Title.Valid {
+			title = p.Title.String
+		}
+		if p.PostDescription.Valid {
+			desc = p.PostDescription.String
+		}
+		fmt.Printf("%s\n%s\n", title, desc)
+
 	}
 	return nil
 }
