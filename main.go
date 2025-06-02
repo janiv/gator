@@ -43,7 +43,7 @@ func main() {
 		}
 	case 2:
 		{
-			if stuff[1] == "reset" || stuff[1] == "users" || stuff[1] == "agg" || stuff[1] == "feeds" || stuff[1] == "following" || stuff[1] == "browse" {
+			if stuff[1] == "reset" || stuff[1] == "users" || stuff[1] == "feeds" || stuff[1] == "following" || stuff[1] == "browse" {
 				issue := Command{
 					name: stuff[1],
 					args: nil,
