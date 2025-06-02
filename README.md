@@ -40,6 +40,18 @@ The general form of the string after "db_url": is:
 So if you chose a different username, password, or port for you Postgres installation change them 
 accordingly.
 
+## Getting databases up and running
+Once you have created a database and have a config file it's to create the 
+tables you will need. Open a terminal use command:
+`psql "postgres://postgres:@localhost:5432/gator"`
+to access the gator database using psql. Then copy and paste the create table
+statements found in sql/schema portion of the project. Do them in numerical
+order. So `CREATE TABLE users ...` first, then feeds, feed_follows, and 
+finally posts.
+
+Once you've done that in psql run command `\dt` and you should see the tables
+you just created. You can then enter `\q` to exit out of psql.
+
 
 ## Running gator and a fixing a problem that *may* occur
 So you've installed Go, and Postgres, and then you've created your config file and database.
@@ -51,9 +63,9 @@ program to start putting users, RSS feeds and posts into the database.
 2. `login <username>` Set user to current_user_name.
 3. `reset` Wipes database.
 4. `users` List all users.
-5. `addfeed <feed_url>` Add an RSS feed to database.
+5. `addfeed <feed_name> <feed_url>` Add an RSS feed to database.
 6. `feeds` Show all feeds in database.
-7. `follow <feed_url>`
+7. `follow <feed_url>` Add feed to current users followed feeds.
 8. `following` Show all feeds current user is following.
 9. `unfollow <feed_url>` Removes feed from user's followed feeds
 10. `browse <int_count optional>` Browse latest updated feeds.
@@ -61,6 +73,12 @@ program to start putting users, RSS feeds and posts into the database.
     update feeds based on which feeds are the oldest/haven't been updated at 
     all.
 
-
+## Example usage
+`./gator register steve`
+`./gator login steve`
+`./gator addfeed "HackerNews" "https://hnrss.org/newest"`
+`./gator follow "https://hnrss.org/newest"`
+`./gator` This will go get posts for user steve from Hackernews every 15s, use CTRL+C to stop.
+`./gator browse` Will return two posts from Hackernews.
 
 

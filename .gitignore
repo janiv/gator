@@ -1,3 +1,6 @@
 notes.txt
-gator
-gator.exe
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
